@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hello World</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="images/hello-icon-152.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="white"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Hello World">
+  <meta name="msapplication-TileImage" content="images/hello-icon-144.png">
+  <meta name="msapplication-TileColor" content="#FFFFFF">
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.4.0/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/7.4.0/firebase-analytics.js"></script>
+<script src="/__/firebase/7.4.0/firebase-database.js"></script>
+<script src="/__/firebase/7.4.0/firebase-auth.js"></script>
+<script src="/__/firebase/7.4.0/firebase-firestore.js"></script>
+
+    <script src="js/main.js"></script>
+    <script src="App.js"></script>
+
+    <script src="js/islogged.js" defer></script>
+
+</head>
+
+<body class="fullscreen"> 
+    <button id="Logout">Log out</button> <br>
+    <table>
+        <tr>
+         <td>Id: </td>
+         <td><input type="text" name="id" id="user_id" /></td>
+        </tr>
+        <tr>
+         <td>User Name: </td>
+         <td><input type="text" name="user_name" id="user_name" /></td>
+        </tr>
+        <tr>
+         <td colspan="2">
+          <input type="button" value="Save" onclick="save_user();" />
+          <input type="button" value="Update" onclick="update_user();" />
+          <input type="button" value="Delete" onclick="delete_user();" />
+         </td>
+        </tr>
+       </table>
+       
+       <h3>Users List</h3>
+       
+       <table id="tbl_users_list" border="1">
+        <tr>
+         <td>#ID</td>
+         <td>NAME</td>
+        </tr>
+       </table>
+       <script>
+       var tblUsers = document.getElementById('tbl_users_list');
+          var databaseRef = firebase.database().ref('users/');
+          var rowIndex = 1;
+          
+          databaseRef.once('value', function(snapshot) {
+            snapshot.forEach(function(childSnapshot) {
+           var childKey = childSnapshot.key;
+           var childData = childSnapshot.val();
+           
+           var row = tblUsers.insertRow(rowIndex);
+           var cellId = row.insertCell(0);
+           var cellName = row.insertCell(1);
+           cellId.appendChild(document.createTextNode(childKey));
+           cellName.appendChild(document.createTextNode(childData.user_name));
+           
+           rowIndex = rowIndex + 1;
+            });
+          });
+          </script>
+<!--
+  <div class="container">
+    <h1 class="title">Hello World!</h1>
+  </div>
+  -->
+
+</body>
+</html>
