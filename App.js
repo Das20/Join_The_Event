@@ -11,7 +11,7 @@ var firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 firebase.analytics();
-
+/*
         function save_user(){
          var user_name = document.getElementById('user_name').value;
         
@@ -55,7 +55,21 @@ firebase.analytics();
          alert('The user is deleted successfully!');
          reload_page();
         }
-        
+        */
         function reload_page(){
          window.location.reload();
         }
+//sidenav
+        document.addEventListener('DOMContentLoaded', function() {
+          var elems = document.querySelectorAll('.sidenav');
+          var instances = M.Sidenav.init(elems);
+        });
+
+function isAdmin(role){
+  if (role=="admin"){
+    return true;
+  }
+  else{
+    return false;
+  }
+}

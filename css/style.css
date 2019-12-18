@@ -1,5 +1,6 @@
 body {
   font-family: sans-serif;
+  background: rgba(147, 184, 209, 0.397);
 }
 
 /* Make content area fill the entire browser window */
@@ -12,12 +13,104 @@ html,
   width: 100%;
 }
 
+.picker{
+  width: 240px;
+}
+
+/* == Responsive Web Design (mobile first) ===== */
+/* MOBILE */
+
+.content {
+  width: 100%;
+  
+}
+
 /* Center the content in the browser window */
 .container {
-  margin: auto;
+  margin-top: 100px;
+  width: 35%;
   text-align: center;
 }
 
 .title {
   font-size: 3rem;
+}
+ .user{
+  width: 100%;
+ }
+
+ .userData{
+  width: 90%;
+  height: 20%;
+  text-align: center;
+  margin: 0 auto;
+  padding: 0;
+  word-break:break-all;
+ }
+
+ .brand {
+  position: absolute;
+  color: #fff;
+  display: inline-block;
+  font-size: 2.1rem;
+  padding: 0;
+}
+
+#nameU {
+  color: red;
+}
+
+/* == Media queries (breakpoint) ===== */
+/* -----------------------------------
+DESKTOP/TABLET
+------------------------------------ */
+@media only screen and (min-width: 768px){
+    
+  .content {
+    width: 100%;
+    
+  }
+
+  /* Center the content in the browser window */
+  .container {
+    margin-top: 100px;
+    width: 35%;
+    text-align: center;
+  }
+
+  .title {
+    font-size: 3rem;
+  }
+  .user{
+    width: 100%;
+  }
+
+  .userData{
+    align-items: center;
+    width: 40%;
+    margin-top: 10px;
+    margin-left: 30%;
+    margin-right: 30%;
+  }
+
+  .brand {
+    position: absolute;
+    color: #fff;
+    display: inline-block;
+    font-size: 2.1rem;
+    padding: 0;
+  }
+
+  #nameU {
+    color: red;
+  }
+
+  .groupData{
+    margin-top: 10px;
+    text-align: center;
+    margin: 10;
+    padding: 5;
+  }
+
+  
 }

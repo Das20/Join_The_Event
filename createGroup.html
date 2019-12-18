@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
   <meta charset="utf-8">
-  <title>Profile</title>
+  <title>Crea gruppo</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
@@ -35,77 +35,56 @@
     <script src="js/main.js"></script>
     <script src="App.js"></script>
 
+    <script src="js/createGroup.js" defer></script>
     <script src="js/islogged.js" defer></script>
-    <script src="js/database.js"></script>
 </head>
 <body class="fullscreen">
 <div class="content">
-<div>
-    <nav class="nav-extended"> 
-      <div class="nav-wrapper content">
-        <a href="#" class="brand">Join The Event</a>
-        <ul id="nav-mobile" class="right">
-          <li><a id="Logout">LOG OUT</a></li>
-        </ul>
-      </div>
-      <div class="nav-content">
-          <ul class="tabs tabs-transparent">
-            <li  class="tab"><a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a></li>
-            <li id="groupName" class="tab"> Seleziona gruppo </li>
-          </ul>
+    <!--nav-->
+    <div>
+        <nav class="nav-extended"> 
+        <div class="nav-wrapper content">
+            <a href="#" class="brand">Join The Event</a>
+            <ul id="nav-mobile" class="right">
+            <li><a id="Logout">LOG OUT</a></li>
+            </ul>
         </div>
-     </nav>
+        <div class="nav-content">
+            <ul class="tabs tabs-transparent">
+                <li  class="tab"><a href="nextpage.html"><i class="material-icons">home</i></a></li>
+                <li class="tab">Crea gruppo</li>
+            </ul>
+            </div>
+        </nav>
+        
+    </div>
 
-    <!-- sidenav -->
-      <ul id="slide-out" class="sidenav">
-        <li><a href="#!"><i class="material-icons">cloud</i>First Link With Icon</a></li>
-        <li><a href="#!">Second Link</a></li>
-        <li><div class="divider"></div></li>
-        <li><a class="subheader">GRUPPI:</a></li>
-        <div id="groups"></div>
-        <li><div class="divider"></div></li>
-        <div id="createGroup"></div>
-      </ul>     
-       
-</div>
+    <!--form input-->
+    <div class="card-panel orange darken-2t groupData">
+      <div class="row">
+        <div class="input-field col">
+          <input id="title" type="text" class="validate">
+          <label class="active blue-text text-darken-2" for="title">Nome</label>
+        </div>
+    </div>
+    
+    
+    <div class="row">
+        <form class="col s12">
+          <div class="row">
+            <div class="input-field col s9">
+              <textarea id="description" class="materialize-textarea"></textarea>
+              <label for="description" class="blue-text text-darken-2">Descrizione</label>
+            </div>
+          </div>
+        </form>
+    </div>
+    </div>
+    
 
-  <div class="card-panel orange darken-2t userData">
-    <p>Utente: <a id="nameU"> </a></p>
-  </div>
+   <!--confirm button-->     
+   <button id="btnCreate" class="waves-effect waves-light btn">Crea gruppo</button>    
 
-<div>  
-    <h4 class="header orange-text text-darken-4">Eventi:</h4>
-  <table class="striped">
-    <thead>
-      <tr>
-          <th>Nome</th>
-          <th>Costo Iscrizione</th>
-          <th>Data e Orario</th>
-          <th>Termine Iscrizione</th>
-      </tr>
-    </thead>
-  
-    <tbody>
-      <tr>
-        <td>arrampicata</td>
-        <td>50 euro</td>
-        <td>13/232/ 3829 12:23</td>
-        <td>13/2843 83/3980 123.4312</td>
-      </tr>
-      <tr>
-        <td>32n</td>
-        <td>32 euro</td>
-        <td>-</td>
-        <td>-</td>
-      </tr>
-      <tr>
-        <td>31n</td>
-        <td>-</td>
-        <td>-</td>
-        <td>-</td>
-      </tr>
-    </tbody>
-  </table></div>
 </div>    
 <!--JavaScript at end of body for optimized loading-->
 <script type="text/javascript" src="js/materialize.js"></script>
