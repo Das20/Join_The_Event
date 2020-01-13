@@ -58,21 +58,24 @@
 
     <!-- sidenav -->
       <ul id="slide-out" class="sidenav">
-        <li><a href="#!"><i class="material-icons">cloud</i>First Link With Icon</a></li>
-        <li><a href="#!">Second Link</a></li>
+        <div id="functions"></div>
+        <div id="createEvent"></div>
         <li><div class="divider"></div></li>
         <li><a class="subheader">GRUPPI:</a></li>
         <div id="groups"></div>
         <li><div class="divider"></div></li>
         <div id="createGroup"></div>
+        <div id="deleteGroup"></div>
       </ul>     
        
 </div>
 
   <div class="card-panel orange darken-2t userData">
     <p>Utente: <a id="nameU"> </a></p>
+    <p>Saldo: <a id="balanceU"> </a></p>
   </div>
 
+  <!--events not yet occurred-->
 <div>  
     <h4 class="header orange-text text-darken-4">Eventi:</h4>
   <table class="striped">
@@ -85,25 +88,26 @@
       </tr>
     </thead>
   
-    <tbody>
+    <tbody id="eventTable">
+      <!--will be filled with events-->
+    </tbody>
+  </table></div>
+  
+<!--events yet occurred, chronology-->
+  <div>  
+    <h4 class="header orange-text text-darken-4">Cronologia:</h4>
+  <table class="striped">
+    <thead>
       <tr>
-        <td>arrampicata</td>
-        <td>50 euro</td>
-        <td>13/232/ 3829 12:23</td>
-        <td>13/2843 83/3980 123.4312</td>
+          <th>Nome</th>
+          <th>Costo Iscrizione</th>
+          <th>Data e Orario</th>
+          <th>Termine Iscrizione</th>
       </tr>
-      <tr>
-        <td>32n</td>
-        <td>32 euro</td>
-        <td>-</td>
-        <td>-</td>
-      </tr>
-      <tr>
-        <td>31n</td>
-        <td>-</td>
-        <td>-</td>
-        <td>-</td>
-      </tr>
+    </thead>
+  
+    <tbody id="chronologyTable">
+      <!--will be filled with events-->
     </tbody>
   </table></div>
 </div>    

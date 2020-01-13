@@ -17,6 +17,19 @@ html,
   width: 240px;
 }
 
+/*these buttons will be activated in determinate situations (infoEvent) */
+.btnParticipate{
+  display:none;
+}
+
+.btnEliminate{
+  display:none;
+}
+
+.btnCancel{
+  display:none;
+}
+
 /* == Responsive Web Design (mobile first) ===== */
 /* MOBILE */
 
