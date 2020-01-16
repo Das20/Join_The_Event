@@ -53,11 +53,12 @@ html,
  }
 
  .userData{
+  margin-top: 10px;
   width: 90%;
   height: 20%;
   text-align: center;
   margin: 0 auto;
-  padding: 0;
+  padding: 10px;
   word-break:break-all;
  }
 
@@ -69,8 +70,17 @@ html,
   padding: 0;
 }
 
-#nameU {
-  color: red;
+.nameU{
+  width: 70%;
+  text-align: center;
+  margin: 0 auto;
+  padding: 0;
+  word-break:break-all;
+}
+
+.changeName{
+  float: left;
+  padding: 6px;
 }
 
 /* == Media queries (breakpoint) ===== */
@@ -112,10 +122,6 @@ DESKTOP/TABLET
     display: inline-block;
     font-size: 2.1rem;
     padding: 0;
-  }
-
-  #nameU {
-    color: red;
   }
 
   .groupData{

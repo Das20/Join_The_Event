@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <meta charset="utf-8">
-  <title>Crea gruppo</title>
+  <title>Crea evento</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
@@ -36,7 +36,7 @@
   <script src="js/main.js"></script>
   <script src="App.js"></script>
 
-  <script src="js/createGroup.js" defer></script>
+  <script src="js/groupMembers.js" defer></script>
   <script src="js/islogged.js" defer></script>
 </head>
 
@@ -54,47 +54,23 @@
         <div class="nav-content">
           <ul class="tabs tabs-transparent">
             <li class="tab"><a href="nextpage.html"><i class="material-icons">home</i></a></li>
-            <li class="tab">Crea gruppo</li>
+            <li id="groupName" class="tab"> Seleziona gruppo </li>
+            <li class="tab"> > modifica membri</li>
           </ul>
         </div>
       </nav>
-
     </div>
-
-    <!--form input-->
-    <div class="card-panel orange darken-2t groupData">
-      <div class="row">
-        <div class="input-field col">
-          <input id="title" type="text" class="validate">
-          <label class="active blue-text text-darken-2" for="title">Nome</label>
-        </div>
-      </div>
-
-
-      <div class="row">
-        <form class="col s12">
-          <div class="row">
-            <div class="input-field col s9">
-              <textarea id="description" class="materialize-textarea"></textarea>
-              <label for="description" class="blue-text text-darken-2">Descrizione</label>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-
-
     <!--confirm button-->
-    <button id="btnCreate" class="waves-effect waves-light btn">Crea gruppo</button>
-
-    <!--selection of group members-->
+    <button id="btnEdit" class="waves-effect waves-light btn">Modifica</button>
+    <!--form input-->
     <ul class="collection with-header">
       <li class="collection-header blue lighten-3">
         <h4>Utenti:</h4>
       </li>
       <div id="addMembers"></div>
-      <!--<li class="collection-item blue-grey lighten-3"><label><input id="alvin" type="checkbox" class="filled-in" /><span class="black-text">Alvin</span></label></li>-->
     </ul>
+
+
 
   </div>
   <!--JavaScript at end of body for optimized loading-->
