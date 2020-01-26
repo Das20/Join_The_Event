@@ -93,6 +93,7 @@ function displayGroup(group) {
   document.getElementById('editMembers').insertAdjacentHTML('afterbegin', codeGD);
   //adding all events of the group
   document.getElementById("eventTable").innerHTML = "";
+  document.getElementById("chronologyTable").innerHTML = "";
   var query = firebase.database().ref('Groups/' + group + '/Events').orderByKey();
   query.once("value")
     .then(function (snapshot) {
@@ -109,15 +110,37 @@ function displayGroup(group) {
             var title = snapshot.child("title").val();
             var cost = snapshot.child("cost").val();
             var dateE = snapshot.child("dateE").val();
+            var timeE = snapshot.child("timeE").val();
             var dateR = snapshot.child("dateR").val();
-            //insert values in the Event Table
-            var codeSingleEvent = '<tr>' +
-              '<td><a href="infoEvent.html?' + group + '&' + title + '"><i class="material-icons">info_outline</i></a>' + title + '</td>' +
-              '<td>' + cost + '</td>' +
-              '<td>' + dateE + '</td>' +
-              '<td>' + dateR + '</td>' +
-              '</tr>';
-            document.getElementById('eventTable').insertAdjacentHTML('afterbegin', codeSingleEvent);
+            var active = snapshot.child("active").val();
+
+            //DA SPOSTARE IN JS A PARTE CRONJOB
+            var parts = dateR.split('/');
+            var mydateR = new Date(parts[2], parts[1] - 1, parts[0]);
+            var today = new Date();
+            console.log("Data chiusura evento:" + mydateR.toDateString());
+            if (today > mydateR) {
+              console.log("possibilità di iscriversi terminata per l'evento:" + title);
+            }
+            if (active) {
+              //insert values in the Event Table
+              var codeSingleEvent = '<tr>' +
+                '<td><a href="infoEvent.html?' + group + '&' + title + '"><i class="material-icons">info_outline</i></a>' + title + '</td>' +
+                '<td>' + cost + '</td>' +
+                '<td>' + dateE + "  " + timeE + '</td>' +
+                '<td>' + dateR + '</td>' +
+                '</tr>';
+              document.getElementById('eventTable').insertAdjacentHTML('afterbegin', codeSingleEvent);
+            } else {
+              //insert values in the Chronology Table
+              var codeSingleEvent = '<tr>' +
+                '<td><a href="infoEvent.html?' + group + '&' + title + '"><i class="material-icons">info_outline</i></a>' + title + '</td>' +
+                '<td>' + cost + '</td>' +
+                '<td>' + dateE + "  " + timeE + '</td>' +
+                '<td>' + dateR + '</td>' +
+                '</tr>';
+              document.getElementById('chronologyTable').insertAdjacentHTML('afterbegin', codeSingleEvent);
+            }
 
           });
 
@@ -159,7 +182,7 @@ async function deleteGroup(group) {
 }
 
 //function that change name of the user
-function changeName(){
+function changeName() {
   var nameU = document.getElementById('nameU').value;
   var user = firebase.auth().currentUser.uid;
   var refU = firebase.database().ref('NameUsers/' + user);

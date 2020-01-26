@@ -10,6 +10,12 @@ document.getElementById('eventName').textContent = event.toString();
 var btnP = document.getElementById("btnParticipate");
 var btnE = document.getElementById("btnEliminate");
 var btnC = document.getElementById("btnCancel");
+var btnOn = document.getElementById("btnOn");
+var btnOff = document.getElementById("btnOff");
+var btnMod1 = document.getElementById("btnMod1");
+var partTab = document.getElementById("partTab");
+var btnMod2 = document.getElementById("btnMod2");
+var nopartTab = document.getElementById("nopartTab");
 
 //request information and view it on the page
 firebase.auth().onAuthStateChanged(firebaseUser => {
@@ -45,47 +51,57 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                             var description = snapshot.child("description").val();
                             var cost = snapshot.child("cost").val();
                             var dateE = snapshot.child("dateE").val();
+                            var timeE = snapshot.child("timeE").val();
                             var dateR = snapshot.child("dateR").val();
-
+                            var active = snapshot.child("active").val();
+                            var timedateE = dateE + "  " + timeE;
                             document.getElementById('title').textContent = title.toString();
                             document.getElementById('description').textContent = description.toString();
                             document.getElementById('cost').textContent = cost.toString();
-                            document.getElementById('dateE').textContent = dateE.toString();
+                            document.getElementById('dateE').textContent = timedateE.toString();
                             document.getElementById('dateR').textContent = dateR.toString();
                             //display participate button or cancel paticipation
                             var ref = firebase.database().ref("Events/" + group + "/" + event + "/Members");
                             ref.once("value").then(function (snapshot) {
                               var joined = snapshot.hasChild(user.uid);
-                              if (joined) { //cancel
+                              if (joined) { //cancel button
                                 btnC.style.display = "initial";
+                                if (!active) {
+                                  btnC.setAttribute('class', 'waves-effect waves-light btn btnCancel disabled');
+                                }
                                 btnC.addEventListener('click', e => {
                                   var namedb = firebase.database().ref('NameUsers/' + user.uid);
                                   namedb.once('value').then(function (snapshot) {
-                                    btnC.style.display = "none";
-                                    btnP.style.display = "initial";
-                                    //add money if you cancel the participation
-                                    var balance = snapshot.child("balance").val();
-                                    var newBal = parseFloat(balance) + parseFloat(cost);
-                                    namedb.child("balance").set(newBal.toFixed(2));
-                                    //remove a new member to the current event
-                                    var eventRef = firebase.database().ref('Events/' + group + "/" + event + "/Members/" + user.uid);
-                                    eventRef.remove();
-                                    //remove the reference to the event in the current user
-                                    var userEventRef = firebase.database().ref('NameUsers/' + user.uid + "/EventsJoined/" + group + "/" + event);
-                                    userEventRef.remove();
-                                    window.location.reload();
-                                    //RIAGGIUNGI SOLDI
+                                    if (active) {
+                                      btnC.style.display = "none";
+                                      btnP.style.display = "initial";
+                                      //add money if you cancel the participation
+                                      var balance = snapshot.child("balance").val();
+                                      var newBal = parseFloat(balance) + parseFloat(cost);
+                                      namedb.child("balance").set(newBal.toFixed(2));
+                                      //remove a new member to the current event
+                                      var eventRef = firebase.database().ref('Events/' + group + "/" + event + "/Members/" + user.uid);
+                                      eventRef.remove();
+                                      //remove the reference to the event in the current user
+                                      var userEventRef = firebase.database().ref('NameUsers/' + user.uid + "/EventsJoined/" + group + "/" + event);
+                                      userEventRef.remove();
+                                      window.location.reload();
+                                      //RIAGGIUNGI SOLDI
+                                    }
                                   });
                                 });
                               }
-                              else { //join
+                              else { //join button
                                 btnP.style.display = "initial";
+                                if (!active) {
+                                  btnP.setAttribute('class', 'disabled waves-effect waves-light btn btnParticipate');
+                                }
                                 btnP.addEventListener('click', e => {
                                   var namedb = firebase.database().ref('NameUsers/' + user.uid);
                                   namedb.once('value').then(function (snapshot) {
                                     var balance = snapshot.child("balance").val();
                                     console.log("il mio saldo" + balance + "il costo:" + cost);
-                                    if (parseFloat(balance) >= parseFloat(cost)) {
+                                    if (active) {
                                       btnP.style.display = "none";
                                       btnC.style.display = "initial";
                                       //balance-cost;        
@@ -98,7 +114,10 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                       var userEventRef = firebase.database().ref('NameUsers/' + user.uid + "/EventsJoined/" + group);
                                       userEventRef.child(event).set(true);
                                       window.location.reload();
-                                    } else { alert("non hai abbastanza soldi per partecipare all'evento" + group); }
+                                    }
+                                    if (parseFloat(balance) < parseFloat(cost)) {
+                                      alert("Attenzione il saldo è negativo!");
+                                    }
                                   });
                                 });
                               }
@@ -111,6 +130,73 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                 if (x) {
                                   deleteEvent(cost);
                                 }
+                              });
+                              //display open/close event participation
+                              if (active) {
+                                btnOff.style.display = "initial";
+                                btnOff.addEventListener('click', e => {
+                                  var activeRef = firebase.database().ref('Events/' + group + "/" + event);
+                                  activeRef.child("active").set(false);
+                                  window.location.reload();
+                                });
+                              }
+                              else if (!active) {
+                                btnOn.style.display = "initial";
+                                btnOn.addEventListener('click', e => {
+                                  var activeRef = firebase.database().ref('Events/' + group + "/" + event);
+                                  activeRef.child("active").set(true);
+                                  window.location.reload();
+                                });
+                              }
+                              //list of participants                             
+                              partTab.style.display = "initial";
+                              //display participants:
+                              var query = firebase.database().ref('Events/' + group + "/" + event + "/Members").orderByKey();
+                              query.once("value")
+                                .then(function (snapshot) {
+                                  snapshot.forEach(function (childSnapshot) {
+                                    var userCode = childSnapshot.key;
+                                    var ref = firebase.database().ref('NameUsers/' + userCode);
+                                    ref.once('value').then(function (snapshot) {
+                                      var nameUser = snapshot.child("name").val();
+                                      var codeEvent = '<li class="collection-item blue-grey lighten-3"><label><input id="' + userCode + '" type="checkbox" checked="checked" class="filled-in" /><span class="black-text">' + nameUser + '</span></label></li>';
+                                      document.getElementById('participants').insertAdjacentHTML('afterbegin', codeEvent);
+                                    });
+                                  });
+                                });
+                              //modify button 1
+                              btnMod1.style.display = "initial";
+                              btnMod1.addEventListener('click', e => {
+                                updateParticipants(cost);
+                              });
+
+                              //list of user not registered:
+                              nopartTab.style.display = "initial";
+                              var query = firebase.database().ref("NameUsers").orderByKey();
+                              query.once("value")
+                                .then(function (snapshot) {
+                                  snapshot.forEach(function (childSnapshot) {
+                                    var userCode = childSnapshot.key;
+                                    var ref = firebase.database().ref('Events/' + group + "/" + event + "/Members");
+                                    ref.once("value")
+                                      .then(function (snapshot) {
+                                        var hasParticipant = snapshot.hasChild(userCode);
+                                        if (!hasParticipant) { //display user only if isn't a participant of the event
+                                          var ref = firebase.database().ref('NameUsers/' + userCode);
+                                          ref.once('value').then(function (snapshot) {
+                                            var nameUser = snapshot.child("name").val();
+                                            var codeEvent = '<li class="collection-item blue-grey lighten-3"><label><input id="' + userCode + '" type="checkbox" class="filled-in" /><span class="black-text">' + nameUser + '</span></label></li>';
+                                            document.getElementById('users').insertAdjacentHTML('afterbegin', codeEvent);
+                                          });
+                                        }
+                                      });
+                                  });
+                                });
+                              //modify button 2
+                              btnMod2.style.display = "initial";
+                              btnMod2.addEventListener('click', e => {
+                                //FUNZIONE PER AGGIUNGERE GLI UTENTE ALL'EVENTO SCALANDO ANCHE I SOLDI
+                                addParticipants(cost);
                               });
                             }
                           });
@@ -138,7 +224,6 @@ async function deleteEvent(cost) {
   await query.once("value")
     .then(function (snapshot) {
       snapshot.forEach(function (childSnapshot) {
-        //DA AGGIUNGERE restituzione costo a chi ha partecipato                
         var key = childSnapshot.key;
         console.log("elimino da utente:" + key);
         var refU = firebase.database().ref('NameUsers/' + key + "/EventsJoined/" + group + "/" + event);
@@ -165,4 +250,70 @@ async function deleteEvent(cost) {
     .catch(function (error) {
       alert("Rimozione dell' evento non riuscita: " + error.message)
     });
+}
+
+//eliminate and refund deselected participants
+async function updateParticipants(cost) {
+  var query = firebase.database().ref('Events/' + group + "/" + event + "/Members").orderByKey();
+  await query.once("value")
+    .then(function (snapshot) {
+      snapshot.forEach(function (childSnapshot) {
+        var userCode = childSnapshot.key;
+        if (document.getElementById(userCode)) {
+          var namecheck = document.getElementById(userCode).checked; //true if checked
+          if (!namecheck) { //select only the unchecked members
+            var namedb = firebase.database().ref('NameUsers/' + userCode);
+            namedb.once('value').then(function (snapshot) {
+              var balance = snapshot.child("balance").val();
+              console.log(userCode + " saldo prec: " + balance + "aggiungo il costo:" + cost);
+              var newBal = parseFloat(balance) + parseFloat(cost);
+              namedb.child("balance").set(newBal.toFixed(2));
+              //remove user from event
+              refE = firebase.database().ref('Events/' + group + "/" + event + "/Members/" + userCode);
+              refE.remove();
+              refU = firebase.database().ref('NameUsers/' + userCode + '/EventsJoined/' + group + "/" + event);
+              refU.remove();
+              console.log(userCode + " si è eliminato dall'evento: " + event);
+            });
+          }
+        }
+      });
+    });
+  window.location.reload();
+}
+
+async function addParticipants(cost) {
+  var query = firebase.database().ref("NameUsers").orderByKey();
+  await query.once("value")
+    .then(function (snapshot) {
+      snapshot.forEach(function (childSnapshot) {
+        var userCode = childSnapshot.key;
+        if (document.getElementById(userCode)) {
+          var ref = firebase.database().ref('Events/' + group + "/" + event + "/Members");
+          ref.once("value")
+            .then(function (snapshot) {
+              var hasParticipant = snapshot.hasChild(userCode);
+              if (!hasParticipant) { //to see if a user already participate to the event
+                var namecheck = document.getElementById(userCode).checked; //true if checked
+                if (namecheck) { //select only the checked users
+                  var namedb = firebase.database().ref('NameUsers/' + userCode);
+                  namedb.once('value').then(function (snapshot) {
+                    var balance = snapshot.child("balance").val();
+                    console.log(userCode + " saldo prec: " + balance + "tolgo il costo:" + cost);
+                    var newBal = parseFloat(balance) - parseFloat(cost);
+                    namedb.child("balance").set(newBal.toFixed(2));
+                    //add user to the event
+                    var eventRef = firebase.database().ref('Events/' + group + "/" + event + "/Members");
+                    eventRef.child(userCode).set(true);
+                    //create the reference to the event in the current user
+                    var userEventRef = firebase.database().ref('NameUsers/' + userCode + "/EventsJoined/" + group);
+                    userEventRef.child(event).set(true);
+                  });
+                }
+              }
+            });
+        }
+      });
+    });
+  window.location.reload();
 }

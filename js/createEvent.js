@@ -1,17 +1,19 @@
 //initialization date picker
 const dateEventPicker = document.getElementById('dateEvent');
 const dateR = document.getElementById('dateRegistration');
+const timeE = document.getElementById('timeEvent');
 const btnCreate = document.getElementById('btnCreate');
 //getting the values from URL
 var queryString_group = decodeURIComponent(window.location.search);
 queryString_group = queryString_group.substring(1);
 document.getElementById('groupName').textContent = queryString_group.toString();
 
+//date and time pickers
 
 dateEventPicker.addEventListener('click', e => {
   var elems = document.querySelector('.datepicker');
   var instances = M.Datepicker.init(elems, {
-    format: 'dd/mm/yy',
+    format: 'dd/mm/yyyy',
     showClearBtn: true
   });
   instances.open();
@@ -20,11 +22,22 @@ dateEventPicker.addEventListener('click', e => {
 dateR.addEventListener('click', e => {
   var elems = document.querySelector('.datepicker2');
   var instances = M.Datepicker.init(elems, {
-    format: 'dd/mm/yy',
+    format: 'dd/mm/yyyy',
     showClearBtn: true
   });
   instances.open();
 });
+
+timeE.addEventListener('click', e => {
+  var elems = document.querySelector('.timePicker');
+  var instances = M.Timepicker.init(elems, {
+    showClearBtn: true,
+    twelveHour: false
+  });
+  instances.open();
+});
+
+//create event
 
 btnCreate.addEventListener('click', e => {
   var user = firebase.auth().currentUser;
@@ -38,6 +51,7 @@ btnCreate.addEventListener('click', e => {
         var description = document.getElementById('description').value;
         var cost = document.getElementById('cost').value;
         var dateE = document.getElementById('dateEvent').value;
+        var timeE = document.getElementById('timeEvent').value;
         var dateR = document.getElementById('dateRegistration').value;
         if (isAdmin(role)) {
           //check if the event already exists
@@ -53,25 +67,29 @@ btnCreate.addEventListener('click', e => {
                     var hasGroup = snapshot.hasChild(queryString_group);
                     if (hasGroup) {
                       if (cost != "" && cost != null) {
-                        //create the event
-                        var eventData = {
-                          title: title,
-                          description: description,
-                          cost: cost,
-                          dateE: dateE,
-                          dateR: dateR
-                        };
-                        //creating child and updates the data
-                        var newEventKey = firebase.database().ref('Events').child(title).key;
-                        var updates = {};
-                        updates['/Events/' + queryString_group + "/" + newEventKey] = eventData;
-                        firebase.database().ref().update(updates);
+                        if (dateE != "" && dateE != null && dateR != "" && dateR != null) {
+                          //create the event
+                          var eventData = {
+                            title: title,
+                            description: description,
+                            cost: cost,
+                            dateE: dateE,
+                            timeE: timeE,
+                            dateR: dateR,
+                            active: true
+                          };
+                          //creating child and updates the data
+                          var newEventKey = firebase.database().ref('Events').child(title).key;
+                          var updates = {};
+                          updates['/Events/' + queryString_group + "/" + newEventKey] = eventData;
+                          firebase.database().ref().update(updates);
 
-                        //create the reference to the event in the group
-                        var groupEventRef = firebase.database().ref('Groups/' + queryString_group + '/Events');
-                        groupEventRef.child(title).set(true);
-                        alert("evento creato con successo!");
-                        window.location.replace("https://prova-179a9.web.app/nextpage.html");
+                          //create the reference to the event in the group
+                          var groupEventRef = firebase.database().ref('Groups/' + queryString_group + '/Events');
+                          groupEventRef.child(title).set(true);
+                          alert("evento creato con successo!");
+                          window.location.replace("https://prova-179a9.web.app/nextpage.html");
+                        } else { alert("non sono state inserite le date correttamente"); }
                       } else { alert("non è stato inserito un 'costo' valido per l'evento"); }
                     }
                     else { alert("non è stato selezionato un gruppo valido per la creazione dell'evento"); }

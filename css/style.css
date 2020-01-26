@@ -20,14 +20,47 @@ html,
 /*these buttons will be activated in determinate situations (infoEvent) */
 .btnParticipate{
   display:none;
-}
-
-.btnEliminate{
-  display:none;
+  margin-left: 10px;
 }
 
 .btnCancel{
   display:none;
+  margin-left: 10px;
+}
+
+.btnEliminate{
+  display:none;
+  margin: 10px;
+}
+
+.btnOn{
+  display:none;
+  margin: 10px;
+}
+
+.btnOff{
+  display:none;
+  margin: 10px;
+}
+
+.btnMod1{
+  display:none;
+  margin: 10px;
+}
+
+.partTab{
+  display:none;
+  margin: 10px;
+}
+
+.btnMod2{
+  display:none;
+  margin: 10px;
+}
+
+.nopartTab{
+  display:none;
+  margin: 10px;
 }
 
 /* == Responsive Web Design (mobile first) ===== */
