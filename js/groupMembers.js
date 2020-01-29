@@ -14,7 +14,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
       .then(function (snapshot) {
         role = snapshot.val();
         if (isAdmin(role)) { //admin will see all members
-          var query = firebase.database().ref('NameUsers').orderByKey();
+          var query = firebase.database().ref('NameUsers').orderByChild('name');
           query.once("value")
             .then(function (snapshot) {
               snapshot.forEach(function (childSnapshot) {
@@ -44,8 +44,6 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                       });
                     }
                   });
-
-
               });
             });
         }

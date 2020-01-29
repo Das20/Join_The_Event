@@ -12,6 +12,9 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
       var balance = snapshot.child("balance").val();
       document.getElementById('nameU').value = name.toString();
       document.getElementById('balanceU').textContent = balance.toString();
+      //profile button
+      var codeProfile = '<li><a href="infoUser.html?' + user + '"><i class="material-icons">person</i> Profilo</a></li>';
+      document.getElementById('functions').insertAdjacentHTML('afterend', codeProfile);
     });
 
     //get groups and show it to the sidenav
@@ -54,7 +57,6 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
         }
       });
 
-
     //display the buttons with which create a group & events only if role="admin"
     var role = firebase.database().ref('NameUsers/' + user + '/role');
     role.once("value")
@@ -64,6 +66,8 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
         if (isAdmin(role)) {
           var codeGroup = '<li><a href="createGroup.html"><i class="material-icons">add_circle</i> Crea gruppo</a></li>';
           document.getElementById('groups').insertAdjacentHTML('afterend', codeGroup);
+          var codeUsers = '<li><a href="usersList.html"><i class="material-icons">people</i> Lista Utenti</a></li>';
+          document.getElementById('functions').insertAdjacentHTML('afterend', codeUsers);
         }
       });
   }
@@ -71,7 +75,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
 
 
 //group function called from buttons in the sidenav, to change the group data in the page
-function displayGroup(group) {
+async function displayGroup(group) {
   console.log("cliccato sul gruppo: " + group);
   //setting data from group selected
   var groupDb = firebase.database().ref('Groups/' + group);
@@ -79,18 +83,27 @@ function displayGroup(group) {
     var titleG = snapshot.child("title").val();
     document.getElementById('groupName').textContent = titleG.toString();
   });
-  //adding the createEvent button for the showed group
-  document.getElementById("functions").innerHTML = "";
-  var codeEvent = '<li><a href="createEvent.html?' + group + '"><i class="material-icons">add_circle</i> Crea nuovo evento</a></li>';
-  document.getElementById('functions').insertAdjacentHTML('afterbegin', codeEvent);
-  //adding the deleteGroup button
-  document.getElementById("deleteGroup").innerHTML = "";
-  var codeGD = '<li><a class="waves-effect" onclick="deleteGroup(' + "'" + group + "'" + ')" ><i class="material-icons">delete_forever</i>Cancella gruppo: ' + group + '</a></li>';
-  document.getElementById('deleteGroup').insertAdjacentHTML('afterbegin', codeGD);
-  //adding the editMembers button
-  document.getElementById("editMembers").innerHTML = "";
-  var codeGD = '<li><a href="groupMembers.html?' + group + '"><i class="material-icons">person_add</i> Modifica membri</a></li>';
-  document.getElementById('editMembers').insertAdjacentHTML('afterbegin', codeGD);
+  var user = firebase.auth().currentUser.uid;
+  var role = firebase.database().ref('NameUsers/' + user + '/role');
+  await role.once("value")
+    .then(function (snapshot) {
+      role = snapshot.val();
+      console.log(role);
+      if (isAdmin(role)) {
+        //adding the createEvent button for the showed group
+        document.getElementById("createEvent").innerHTML = "";
+        var codeEvent = '<li><a href="createEvent.html?' + group + '"><i class="material-icons">add_circle</i> Crea nuovo evento</a></li>';
+        document.getElementById('createEvent').insertAdjacentHTML('afterbegin', codeEvent);
+        //adding the deleteGroup button
+        document.getElementById("deleteGroup").innerHTML = "";
+        var codeGD = '<li><a class="waves-effect" onclick="deleteGroup(' + "'" + group + "'" + ')" ><i class="material-icons">delete_forever</i>Cancella gruppo: ' + group + '</a></li>';
+        document.getElementById('deleteGroup').insertAdjacentHTML('afterbegin', codeGD);
+        //adding the editMembers button
+        document.getElementById("editMembers").innerHTML = "";
+        var codeGD = '<li><a href="groupMembers.html?' + group + '"><i class="material-icons">group_add</i> Modifica membri</a></li>';
+        document.getElementById('editMembers').insertAdjacentHTML('afterbegin', codeGD);
+      }
+    });
   //adding all events of the group
   document.getElementById("eventTable").innerHTML = "";
   document.getElementById("chronologyTable").innerHTML = "";

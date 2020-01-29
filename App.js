@@ -73,3 +73,18 @@ function isAdmin(role){
     return false;
   }
 }
+
+//format date to yyyy/mm/dd
+function formatDate(date) {
+  var year = date.getFullYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  if (day < 10) {
+    day = '0' + day;
+  }
+  if (month < 10) {
+    month = '0' + month;
+  }
+  var formattedDate = year + '/' + month + '/' + day
+  return formattedDate;
+}

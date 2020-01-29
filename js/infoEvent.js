@@ -6,6 +6,8 @@ var group = queries[0];
 var event = queries[1];
 document.getElementById('groupName').textContent = group.toString() + " >";
 document.getElementById('eventName').textContent = event.toString();
+var today = new Date();
+todayS = formatDate(today);
 
 var btnP = document.getElementById("btnParticipate");
 var btnE = document.getElementById("btnEliminate");
@@ -85,8 +87,8 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                       //remove the reference to the event in the current user
                                       var userEventRef = firebase.database().ref('NameUsers/' + user.uid + "/EventsJoined/" + group + "/" + event);
                                       userEventRef.remove();
+                                      outgoHistoryRemove(user.uid); //remove outgo report to the current user
                                       window.location.reload();
-                                      //RIAGGIUNGI SOLDI
                                     }
                                   });
                                 });
@@ -113,6 +115,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                       //create the reference to the event in the current user
                                       var userEventRef = firebase.database().ref('NameUsers/' + user.uid + "/EventsJoined/" + group);
                                       userEventRef.child(event).set(true);
+                                      outgoHistoryAdd(user.uid); //add outgo report to the current user
                                       window.location.reload();
                                     }
                                     if (parseFloat(balance) < parseFloat(cost)) {
@@ -172,7 +175,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
 
                               //list of user not registered:
                               nopartTab.style.display = "initial";
-                              var query = firebase.database().ref("NameUsers").orderByKey();
+                              var query = firebase.database().ref("NameUsers").orderByChild('name');
                               query.once("value")
                                 .then(function (snapshot) {
                                   snapshot.forEach(function (childSnapshot) {
@@ -228,6 +231,7 @@ async function deleteEvent(cost) {
         console.log("elimino da utente:" + key);
         var refU = firebase.database().ref('NameUsers/' + key + "/EventsJoined/" + group + "/" + event);
         refU.remove(); //remove event joined by the user
+        outgoHistoryRemove(key); //remove outgo report because money given back
         //give back money to participant
         var namedb = firebase.database().ref('NameUsers/' + key);
         namedb.once('value').then(function (snapshot) {
@@ -273,6 +277,7 @@ async function updateParticipants(cost) {
               refE.remove();
               refU = firebase.database().ref('NameUsers/' + userCode + '/EventsJoined/' + group + "/" + event);
               refU.remove();
+              outgoHistoryRemove(userCode); //remove outgo report because money given back
               console.log(userCode + " si è eliminato dall'evento: " + event);
             });
           }
@@ -308,6 +313,7 @@ async function addParticipants(cost) {
                     //create the reference to the event in the current user
                     var userEventRef = firebase.database().ref('NameUsers/' + userCode + "/EventsJoined/" + group);
                     userEventRef.child(event).set(true);
+                    outgoHistoryAdd(userCode); //add outgo report to the user
                   });
                 }
               }
@@ -316,4 +322,24 @@ async function addParticipants(cost) {
       });
     });
   window.location.reload();
+}
+
+//event cost history add
+function outgoHistoryAdd(userC) {
+  var queryEvent = firebase.database().ref('Events/' + group + "/" + event);
+  queryEvent.once("value").then(function (snapshot) {
+    var cost = parseFloat(snapshot.child("cost").val());
+    var ref = firebase.database().ref('NameUsers/' + userC + "/outgo/" + group + "/" + event);
+    var outgoData = {
+      amount: cost.toFixed(2),
+      date: todayS
+    };
+    ref.set(outgoData);
+  });
+}
+
+//event cost history remove
+function outgoHistoryRemove(userC) {
+    var ref = firebase.database().ref('NameUsers/' + userC + "/outgo/" + group + "/" + event);
+    ref.remove();
 }

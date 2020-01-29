@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <meta charset="utf-8">
-  <title>Profile</title>
+  <title>Home</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
@@ -37,7 +37,7 @@
   <script src="App.js"></script>
 
   <script src="js/islogged.js" defer></script>
-  <script src="js/database.js"></script>
+  <script src="js/database.js" defer></script>
 </head>
 
 <body class="fullscreen">
@@ -62,6 +62,9 @@
       <!-- sidenav -->
       <ul id="slide-out" class="sidenav">
         <div id="functions"></div>
+        <li>
+          <div class="divider"></div>
+        </li>
         <div id="editMembers"></div>
         <div id="createEvent"></div>
         <li>
@@ -82,7 +85,7 @@
       <div class="changeName"><a onclick="changeName()" class="btn-floating btn-small waves-effect waves-light blue"><i class="material-icons">create</i></a></div>
       <div class="row nameU">
         <div class="input-field">
-          <input value="none" id="nameU" type="text" class="validate">
+          <input value="Nome Cognome" id="nameU" type="text" class="validate">
           <label class="active" for="nameU">Utente</label>
         </div>
       </div>

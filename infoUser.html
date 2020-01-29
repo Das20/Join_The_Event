@@ -11,7 +11,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <meta charset="utf-8">
-  <title>Membri del gruppo</title>
+  <title>Profile</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
@@ -36,8 +36,8 @@
   <script src="js/main.js"></script>
   <script src="App.js"></script>
 
-  <script src="js/groupMembers.js" defer></script>
   <script src="js/islogged.js" defer></script>
+  <script src="js/infoUser.js" defer></script>
 </head>
 
 <body class="fullscreen">
@@ -54,24 +54,61 @@
         <div class="nav-content">
           <ul class="tabs tabs-transparent">
             <li class="tab"><a href="nextpage.html"><i class="material-icons">home</i></a></li>
-            <li id="groupName" class="tab"> Seleziona gruppo </li>
-            <li class="tab"> > modifica membri</li>
+            <li class="tab"> Profilo </li>
           </ul>
         </div>
       </nav>
     </div>
-    <!--confirm button-->
-    <button id="btnEdit" class="waves-effect waves-light btn">Modifica</button>
-    <!--form input-->
-    <ul class="collection with-header">
-      <li class="collection-header blue lighten-3">
-        <h4>Utenti:</h4>
-      </li>
-      <div id="addMembers"></div>
-    </ul>
 
+    <div class="card-panel orange darken-2t userData">
+      <div class="changeName"><a onclick="changeName()" class="btn-floating btn-small waves-effect waves-light blue"><i class="material-icons">create</i></a></div>
+      <div class="row nameU">
+        <div class="input-field">
+          <input value="Nome Cognome" id="nameU" type="text" class="validate">
+          <label class="active" for="nameU">Utente</label>
+        </div>
+      </div>
+      
+      <p>Saldo: <a id="balanceU" class="balanceU"> </a></p>
+    </div>
 
+    <!--contributions table-->
+    <div>
+      <h4 class="header orange-text text-darken-4">Contributi:</h4>
+      <table class="striped">
+        <thead>
+          <tr>
+            <th width="15%">Importo</th>
+            <th width="40%">Descrizione</th>
+            <th>Data</th>
+          </tr>
+        </thead>
 
+        <tbody id="contrTable">
+          <!--will be filled with contributions-->
+          <!--add a contribution to the user-->
+        </tbody>
+      </table>
+    </div>
+
+    <!--events cost history-->
+    <div>
+      <h4 class="header orange-text text-darken-4">Cronologia spese:</h4>
+      <table class="striped">
+        <thead>
+          <tr>
+            <th width="13%">Costo</th>
+            <th>Gruppo</th>
+            <th>Evento</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+
+        <tbody id="costHistory">
+          <!--will be filled with events ended-->
+        </tbody>
+      </table>
+    </div>
   </div>
   <!--JavaScript at end of body for optimized loading-->
   <script type="text/javascript" src="js/materialize.js"></script>
