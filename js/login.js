@@ -65,9 +65,8 @@ btnGoogle.addEventListener('click', e => {
 });
 
 firebase.auth().onAuthStateChanged(firebaseUser => {
-  if (firebaseUser) {   
-  startUser();
-
+  if (firebaseUser) {
+    startUser();
 
   } else {
     console.log('not logged in');
@@ -75,21 +74,12 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
   }
 });
 
-async function startUser(){
-  var user = firebase.auth().currentUser.uid;
-  var ref = firebase.database().ref("NameUsers");
-  await ref.once("value")
-    .then(function (snapshot) { //async fo redirect the page at the end of creating all group's data
-      var existUser = snapshot.hasChild(user); 
-      if(!existUser){ //if not exist
-        var refU = firebase.database().ref('NameUsers/' + user);
-        refU.child("name").set("none");
-        refU.child("balance").set(0);
-        refU.child("role").set("user");
-      }
-      else{console.log("già registrato!");}
-    });
-
-    window.location.href = "nextpage.html";
+async function startUser() {
+        //server function
+        var initUserData = firebase.app().functions('europe-west1').httpsCallable('initUserData');
+        await initUserData({email : firebase.auth().currentUser.email}).then(function (result) {
+        }).catch(function (error) {
+        });
+        window.location.href = "nextpage.html";
 }
 

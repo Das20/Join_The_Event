@@ -8,7 +8,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
     console.log(user);
     var namedb = firebase.database().ref('NameUsers/' + user);
     namedb.once('value').then(function (snapshot) {
-      var name = snapshot.child("name").val();
+      var name = snapshot.child("info/name").val();
       var balance = snapshot.child("balance").val();
       document.getElementById('nameU').value = name.toString();
       document.getElementById('balanceU').textContent = balance.toString();
@@ -126,15 +126,6 @@ async function displayGroup(group) {
             var timeE = snapshot.child("timeE").val();
             var dateR = snapshot.child("dateR").val();
             var active = snapshot.child("active").val();
-
-            //DA SPOSTARE IN JS A PARTE CRONJOB
-            var parts = dateR.split('/');
-            var mydateR = new Date(parts[2], parts[1] - 1, parts[0]);
-            var today = new Date();
-            console.log("Data chiusura evento:" + mydateR.toDateString());
-            if (today > mydateR) {
-              console.log("possibilità di iscriversi terminata per l'evento:" + title);
-            }
             if (active) {
               //insert values in the Event Table
               var codeSingleEvent = '<tr>' +
@@ -199,6 +190,6 @@ function changeName() {
   var nameU = document.getElementById('nameU').value;
   var user = firebase.auth().currentUser.uid;
   var refU = firebase.database().ref('NameUsers/' + user);
-  refU.child("name").set(nameU);
+  refU.child("info/name").set(nameU);
   alert("nome cambiato correttamente!");
 }

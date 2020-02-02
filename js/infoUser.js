@@ -3,6 +3,8 @@ userCode = userCode.substring(1);
 console.log("profilo: " + userCode)
 var today = new Date();
 todayS = formatDate(today);
+const btnEdit = document.getElementById('change');
+
 
 //contribution tab
 
@@ -72,8 +74,22 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                 }
                 else { alert("permesso negato"); }
               }
-              //display all outgo reports
+
               if (isAdmin(role) || userCode == user.uid) {
+                //display info of the user
+                var namedb = firebase.database().ref('NameUsers/' + userCode);
+                namedb.once('value').then(function (snapshot) {
+                  document.getElementById('nameU').value = snapshot.child("info/name").val();
+                  document.getElementById('emailU').value = snapshot.child("info/email").val();
+                  document.getElementById('telU').value = snapshot.child("info/tel").val();
+                  document.getElementById('addressU').value = snapshot.child("info/address").val();
+                  document.getElementById('birthU').value = snapshot.child("info/birthday").val();
+                  document.getElementById('balanceU').textContent = snapshot.child("balance").val();
+                });
+                btnEdit.addEventListener('click', e => {
+                  change();
+                });
+                //display all outgo reports
                 var query = firebase.database().ref('NameUsers/' + userCode + "/outgo").orderByChild('date');
                 query.once("value")
                   .then(function (snapshot) {
@@ -115,9 +131,15 @@ async function createDeposit(userC) {
       description: description,
       date: todayS
     };
+    //server side function
+    var balanceChange = firebase.app().functions('europe-west1').httpsCallable('balanceChange');
+    await balanceChange({ amount: amount, userSel: userC }).then(function (result) {
+      // Read result of the Cloud Function.                                       
+    }).catch(function (error) {
+      // Getting the Error details.                                       
+    });
     ref.set(depositData);
     window.location.reload();
-    //INSERIRE LA FUNZIONE di aggiunta importo CHE DOVRà ESSERE SERVER SIDE
   } else { alert("non è stato inserito un deposito valido"); }
 }
 
@@ -126,26 +148,62 @@ function updateDeposit(depositC) {
   var amount = parseFloat(document.getElementById(depositC + "Amount").value);
   var description = document.getElementById(depositC + "Desc").value;
   if (amount != "" && amount != null) {
-    var ref = firebase.database().ref('NameUsers/' + userCode + "/deposit/" + depositC);
-    var depositData = {
-      amount: amount.toFixed(2),
-      description: description,
-      date: todayS
-    };
-    ref.update(depositData);
-    window.location.reload();
-    //INSERIRE LA FUNZIONE di Modifica importo CHE DOVRà ESSERE SERVER SIDE
+    var bal = firebase.database().ref('NameUsers/' + userCode + "/deposit/" + depositC);
+    bal.once("value")
+      .then(async function (snapshot) {
+        var oldAmount = snapshot.child('amount').val();
+        var ref = firebase.database().ref('NameUsers/' + userCode + "/deposit/" + depositC);
+        var depositData = {
+          amount: amount.toFixed(2),
+          description: description,
+          date: todayS
+        };
+        var amountDiff = amount - parseFloat(oldAmount);
+        //server side function
+        var balanceChange = firebase.app().functions('europe-west1').httpsCallable('balanceChange');
+        await balanceChange({ amount: amountDiff, userSel: userCode }).then(function (result) {
+        }).catch(function (error) {
+        });
+
+        ref.update(depositData);
+        window.location.reload();
+      });
   } else { alert("non è stato inserito un deposito valido"); }
 }
 
 //delete a deposit report and remove amount
-function deleteDeposit(depositC) {
+async function deleteDeposit(depositC) {
   var x = confirm("Sei sicuro di voler cancellare il report?");
   if (x) {
-    refD = firebase.database().ref('NameUsers/' + userCode + "/deposit/" + depositC);
-    refD.remove();
-    window.location.reload();
+    var bal = firebase.database().ref('NameUsers/' + userCode + "/deposit/" + depositC);
+    bal.once("value")
+      .then(async function (snapshot) {
+        var amount = snapshot.child('amount').val();
+        refD = firebase.database().ref('NameUsers/' + userCode + "/deposit/" + depositC);
+        //server side function
+        var balanceChange = firebase.app().functions('europe-west1').httpsCallable('balanceChange');
+        await balanceChange({ amount: (-amount), userSel: userCode }).then(function (result) {
+        }).catch(function (error) {
+        });
+        refD.remove();
+        window.location.reload();
+      });
   }
-  //INSERIRE LA FUNZIONE di ELIMINAZIONE importo CHE DOVRà ESSERE SERVER SIDE
+}
+
+//function that change info of the user
+function change() {
+  var nameU = document.getElementById('nameU').value;
+  var emailU = document.getElementById('emailU').value;
+  var telU = document.getElementById('telU').value;
+  var addressU = document.getElementById('addressU').value;
+  var birthU = document.getElementById('birthU').value;
+  var refU = firebase.database().ref('NameUsers/' + userCode);
+  refU.child("info/name").set(nameU);
+  refU.child("info/email").set(emailU);
+  refU.child("info/tel").set(telU);
+  refU.child("info/address").set(addressU);
+  refU.child("info/birthday").set(birthU);
+  alert("dati modificati correttamente!");
 }
 

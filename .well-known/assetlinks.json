@@ -1,8 +1,9 @@
 [{
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.netguru.wordguru",
-      "sha256_cert_fingerprints": ["8A:F4:....:29:28"]
-    }
-  }]
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.jointheevent.android.jointheevent",
+    "sha256_cert_fingerprints":
+    ["EE:63:A7:4D:68:D3:7A:7A:0A:38:74:C2:AC:1C:C7:CF:DA:58:E2:56:A9:8D:EE:30:02:48:14:D8:C5:0B:CC:5B"]
+  }
+}]

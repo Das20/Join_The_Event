@@ -14,7 +14,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
       .then(function (snapshot) {
         role = snapshot.val();
         if (isAdmin(role)) { //admin will see all members
-          var query = firebase.database().ref('NameUsers').orderByChild('name');
+          var query = firebase.database().ref('NameUsers').orderByChild('info/name');
           query.once("value")
             .then(function (snapshot) {
               snapshot.forEach(function (childSnapshot) {
@@ -27,7 +27,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                       //the user is already a member and is checked
                       var ref = firebase.database().ref('NameUsers/' + userCode);
                       ref.once('value').then(function (snapshot) {
-                        var nameUser = snapshot.child("name").val();
+                        var nameUser = snapshot.child("info/name").val();
                         var codeEvent = '<li class="collection-item blue-grey lighten-3"><label><input id="' + userCode + '" type="checkbox" checked="checked" class="filled-in" /><span class="black-text">' + nameUser + '</span></label></li>';
                         console.log("display: " + userCode + " name: " + nameUser + " --- già membro!");
                         document.getElementById('addMembers').insertAdjacentHTML('afterbegin', codeEvent);
@@ -37,7 +37,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                       //user isn't a member of the group (unchecked)
                       var ref = firebase.database().ref('NameUsers/' + userCode);
                       ref.once('value').then(function (snapshot) {
-                        var nameUser = snapshot.child("name").val();
+                        var nameUser = snapshot.child("info/name").val();
                         var codeEvent = '<li class="collection-item blue-grey lighten-3"><label><input id="' + userCode + '" type="checkbox" class="filled-in" /><span class="black-text">' + nameUser + '</span></label></li>';
                         console.log("display: " + userCode + " name: " + nameUser);
                         document.getElementById('addMembers').insertAdjacentHTML('afterbegin', codeEvent);

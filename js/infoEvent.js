@@ -73,21 +73,17 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                 }
                                 btnC.addEventListener('click', e => {
                                   var namedb = firebase.database().ref('NameUsers/' + user.uid);
-                                  namedb.once('value').then(function (snapshot) {
+                                  namedb.once('value').then(async function (snapshot) {
                                     if (active) {
                                       btnC.style.display = "none";
                                       btnP.style.display = "initial";
-                                      //add money if you cancel the participation
-                                      var balance = snapshot.child("balance").val();
-                                      var newBal = parseFloat(balance) + parseFloat(cost);
-                                      namedb.child("balance").set(newBal.toFixed(2));
-                                      //remove a new member to the current event
-                                      var eventRef = firebase.database().ref('Events/' + group + "/" + event + "/Members/" + user.uid);
-                                      eventRef.remove();
-                                      //remove the reference to the event in the current user
-                                      var userEventRef = firebase.database().ref('NameUsers/' + user.uid + "/EventsJoined/" + group + "/" + event);
-                                      userEventRef.remove();
-                                      outgoHistoryRemove(user.uid); //remove outgo report to the current user
+                                      //server side function
+                                      var manageCost = firebase.app().functions('europe-west1').httpsCallable('manageCost');
+                                      await manageCost({ group: group, event: event, participate: false }).then(function (result) {
+                                        // Read result of the Cloud Function.                                       
+                                      }).catch(function (error) {
+                                        // Getting the Error details.                                       
+                                      });
                                       window.location.reload();
                                     }
                                   });
@@ -100,26 +96,23 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                 }
                                 btnP.addEventListener('click', e => {
                                   var namedb = firebase.database().ref('NameUsers/' + user.uid);
-                                  namedb.once('value').then(function (snapshot) {
+                                  namedb.once('value').then(async function (snapshot) {
                                     var balance = snapshot.child("balance").val();
                                     console.log("il mio saldo" + balance + "il costo:" + cost);
                                     if (active) {
                                       btnP.style.display = "none";
                                       btnC.style.display = "initial";
-                                      //balance-cost;        
-                                      var newBal = parseFloat(balance) - parseFloat(cost);
-                                      namedb.child("balance").set(newBal.toFixed(2));
-                                      //add a new member to the current event
-                                      var eventRef = firebase.database().ref('Events/' + group + "/" + event + "/Members");
-                                      eventRef.child(user.uid).set(true);
-                                      //create the reference to the event in the current user
-                                      var userEventRef = firebase.database().ref('NameUsers/' + user.uid + "/EventsJoined/" + group);
-                                      userEventRef.child(event).set(true);
-                                      outgoHistoryAdd(user.uid); //add outgo report to the current user
+                                      //server side function
+                                      var manageCost = firebase.app().functions('europe-west1').httpsCallable('manageCost');
+                                      await manageCost({ group: group, event: event, participate: true }).then(function (result) {
+                                        // Read result of the Cloud Function.
+                                      }).catch(function (error) {
+                                        // Getting the Error details.
+                                      });
+                                      if (parseFloat(balance) < parseFloat(cost)) {
+                                        alert("Attenzione il saldo è negativo!");
+                                      }
                                       window.location.reload();
-                                    }
-                                    if (parseFloat(balance) < parseFloat(cost)) {
-                                      alert("Attenzione il saldo è negativo!");
                                     }
                                   });
                                 });
@@ -161,7 +154,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                     var userCode = childSnapshot.key;
                                     var ref = firebase.database().ref('NameUsers/' + userCode);
                                     ref.once('value').then(function (snapshot) {
-                                      var nameUser = snapshot.child("name").val();
+                                      var nameUser = snapshot.child("info/name").val();
                                       var codeEvent = '<li class="collection-item blue-grey lighten-3"><label><input id="' + userCode + '" type="checkbox" checked="checked" class="filled-in" /><span class="black-text">' + nameUser + '</span></label></li>';
                                       document.getElementById('participants').insertAdjacentHTML('afterbegin', codeEvent);
                                     });
@@ -175,7 +168,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
 
                               //list of user not registered:
                               nopartTab.style.display = "initial";
-                              var query = firebase.database().ref("NameUsers").orderByChild('name');
+                              var query = firebase.database().ref("NameUsers").orderByChild('info/name');
                               query.once("value")
                                 .then(function (snapshot) {
                                   snapshot.forEach(function (childSnapshot) {
@@ -187,7 +180,7 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                         if (!hasParticipant) { //display user only if isn't a participant of the event
                                           var ref = firebase.database().ref('NameUsers/' + userCode);
                                           ref.once('value').then(function (snapshot) {
-                                            var nameUser = snapshot.child("name").val();
+                                            var nameUser = snapshot.child("info/name").val();
                                             var codeEvent = '<li class="collection-item blue-grey lighten-3"><label><input id="' + userCode + '" type="checkbox" class="filled-in" /><span class="black-text">' + nameUser + '</span></label></li>';
                                             document.getElementById('users').insertAdjacentHTML('afterbegin', codeEvent);
                                           });
@@ -198,7 +191,6 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                               //modify button 2
                               btnMod2.style.display = "initial";
                               btnMod2.addEventListener('click', e => {
-                                //FUNZIONE PER AGGIUNGERE GLI UTENTE ALL'EVENTO SCALANDO ANCHE I SOLDI
                                 addParticipants(cost);
                               });
                             }
@@ -233,12 +225,12 @@ async function deleteEvent(cost) {
         refU.remove(); //remove event joined by the user
         outgoHistoryRemove(key); //remove outgo report because money given back
         //give back money to participant
-        var namedb = firebase.database().ref('NameUsers/' + key);
-        namedb.once('value').then(function (snapshot) {
-          var balance = snapshot.child("balance").val();
-          console.log(key + " saldo prec: " + balance + "aggiungo il costo:" + cost);
-          var newBal = parseFloat(balance) + parseFloat(cost);
-          namedb.child("balance").set(newBal.toFixed(2));
+        //server side function
+        var balanceChange = firebase.app().functions('europe-west1').httpsCallable('balanceChange');
+        balanceChange({ amount:cost,userSel:key}).then(function (result) {
+          // Read result of the Cloud Function.                                       
+        }).catch(function (error) {
+          // Getting the Error details.                                       
         });
 
       });
@@ -266,20 +258,20 @@ async function updateParticipants(cost) {
         if (document.getElementById(userCode)) {
           var namecheck = document.getElementById(userCode).checked; //true if checked
           if (!namecheck) { //select only the unchecked members
-            var namedb = firebase.database().ref('NameUsers/' + userCode);
-            namedb.once('value').then(function (snapshot) {
-              var balance = snapshot.child("balance").val();
-              console.log(userCode + " saldo prec: " + balance + "aggiungo il costo:" + cost);
-              var newBal = parseFloat(balance) + parseFloat(cost);
-              namedb.child("balance").set(newBal.toFixed(2));
-              //remove user from event
-              refE = firebase.database().ref('Events/' + group + "/" + event + "/Members/" + userCode);
-              refE.remove();
-              refU = firebase.database().ref('NameUsers/' + userCode + '/EventsJoined/' + group + "/" + event);
-              refU.remove();
-              outgoHistoryRemove(userCode); //remove outgo report because money given back
-              console.log(userCode + " si è eliminato dall'evento: " + event);
+            //server side function
+            var balanceChange = firebase.app().functions('europe-west1').httpsCallable('balanceChange');
+            balanceChange({ amount: cost,userSel:userCode }).then(function (result) {
+              // Read result of the Cloud Function.                                       
+            }).catch(function (error) {
+              // Getting the Error details.                                       
             });
+            //remove user from event
+            refE = firebase.database().ref('Events/' + group + "/" + event + "/Members/" + userCode);
+            refE.remove();
+            refU = firebase.database().ref('NameUsers/' + userCode + '/EventsJoined/' + group + "/" + event);
+            refU.remove();
+            outgoHistoryRemove(userCode); //remove outgo report because money given back
+            console.log(userCode + " si è eliminato dall'evento: " + event);
           }
         }
       });
@@ -301,20 +293,20 @@ async function addParticipants(cost) {
               if (!hasParticipant) { //to see if a user already participate to the event
                 var namecheck = document.getElementById(userCode).checked; //true if checked
                 if (namecheck) { //select only the checked users
-                  var namedb = firebase.database().ref('NameUsers/' + userCode);
-                  namedb.once('value').then(function (snapshot) {
-                    var balance = snapshot.child("balance").val();
-                    console.log(userCode + " saldo prec: " + balance + "tolgo il costo:" + cost);
-                    var newBal = parseFloat(balance) - parseFloat(cost);
-                    namedb.child("balance").set(newBal.toFixed(2));
-                    //add user to the event
-                    var eventRef = firebase.database().ref('Events/' + group + "/" + event + "/Members");
-                    eventRef.child(userCode).set(true);
-                    //create the reference to the event in the current user
-                    var userEventRef = firebase.database().ref('NameUsers/' + userCode + "/EventsJoined/" + group);
-                    userEventRef.child(event).set(true);
-                    outgoHistoryAdd(userCode); //add outgo report to the user
+                  //server side function
+                  var balanceChange = firebase.app().functions('europe-west1').httpsCallable('balanceChange');
+                  balanceChange({ amount: (-cost),userSel:userCode }).then(function (result) {
+                    // Read result of the Cloud Function.                                       
+                  }).catch(function (error) {
+                    // Getting the Error details.                                       
                   });
+                  //add user to the event
+                  var eventRef = firebase.database().ref('Events/' + group + "/" + event + "/Members");
+                  eventRef.child(userCode).set(true);
+                  //create the reference to the event in the current user
+                  var userEventRef = firebase.database().ref('NameUsers/' + userCode + "/EventsJoined/" + group);
+                  userEventRef.child(event).set(true);
+                  outgoHistoryAdd(userCode); //add outgo report to the user
                 }
               }
             });
@@ -340,6 +332,6 @@ function outgoHistoryAdd(userC) {
 
 //event cost history remove
 function outgoHistoryRemove(userC) {
-    var ref = firebase.database().ref('NameUsers/' + userC + "/outgo/" + group + "/" + event);
-    ref.remove();
+  var ref = firebase.database().ref('NameUsers/' + userC + "/outgo/" + group + "/" + event);
+  ref.remove();
 }

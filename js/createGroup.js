@@ -9,17 +9,17 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
         .then(function(snapshot) {
           role = snapshot.val();
         if(isAdmin(role)){ //admin will see all members
-            var query = firebase.database().ref('NameUsers').orderByKey();
+            var query = firebase.database().ref('NameUsers').orderByChild('info/name');
             query.once("value")
                 .then(function(snapshot) {
                 snapshot.forEach(function(childSnapshot) {
                     var userCode = childSnapshot.key;
                     var ref = firebase.database().ref('NameUsers/'+ userCode);
                     ref.once('value').then(function(snapshot) {
-                        var nameUser = snapshot.child("name").val();
+                        var nameUser = snapshot.child("info/name").val();
                         var codeEvent = '<li class="collection-item blue-grey lighten-3"><label><input id="'+userCode+'" type="checkbox" class="filled-in" /><span class="black-text">'+nameUser+'</span></label></li>';
                         console.log("display: "+ userCode + " name: "+ nameUser);
-                        document.getElementById('addMembers').insertAdjacentHTML('afterbegin', codeEvent);
+                        document.getElementById('addMembers').insertAdjacentHTML('beforeend', codeEvent);
                         });                 
                     });
                 });
@@ -88,25 +88,3 @@ btnCreate.addEventListener('click', e => {
     // No user is signed in.
     }
     });
-
-
-    // DA ELIMINARE?????????????___________________________
-/*function exist(){
-    var ref = firebase.database().ref("Groups");
-    ref.once("value").then(function(snapshot) {
-    var hasName = snapshot.hasChild("title"); // true
-    if(!hasName){
-        //create the group
-        console.log(title);
-        var groupData = {
-            title: title,
-            description: description,
-          };
-        //creating child and updates the data
-        var newGroupKey = firebase.database().ref('Groups').child(title).key;
-        var updates = {};
-        updates['/Groups/' + newGroupKey] = groupData;
-        firebase.database().ref().update(updates);
-    }
-  });
-}*/
