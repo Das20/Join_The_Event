@@ -18,6 +18,7 @@ var btnOff = document.getElementById("btnOff");
 var btnMod1 = document.getElementById("btnMod1");
 var partTab = document.getElementById("partTab");
 var btnMod2 = document.getElementById("btnMod2");
+var listUsers = document.getElementById("listUsers");
 var nopartTab = document.getElementById("nopartTab");
 
 //request information and view it on the page
@@ -173,18 +174,45 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                 updateParticipants(cost);
                               });
 
-                              //list of user not registered:
+                              //list of user not registered but belonging to the current group:
                               nopartTab.style.display = "initial";
                               var query = firebase.database().ref("NameUsers").orderByChild('info/name');
-                              query.once("value")
-                                .then(function (snapshot) {
+                              query.once("value").then(function (snapshot) {
+                                snapshot.forEach(function (childSnapshot) {
+                                  var userCode = childSnapshot.key;
+                                  var ref = firebase.database().ref('Events/' + group + "/" + event1 + "/Members");
+                                  ref.once("value").then(function (snapshot) {
+                                    var hasParticipant = snapshot.hasChild(userCode);
+                                    var ref = firebase.database().ref('Groups/' + group + "/Members");
+                                    ref.once("value").then(function (snapshot) {
+                                      var isMember = snapshot.hasChild(userCode);
+                                      if (!hasParticipant && isMember) { //display user only if isn't a participant of the event and is a member of the current group
+                                        var ref = firebase.database().ref('NameUsers/' + userCode);
+                                        ref.once('value').then(function (snapshot) {
+                                          var nameUser = snapshot.child("info/name").val();
+                                          var codeEvent = '<li class="collection-item blue-grey lighten-3"><label><input id="' + userCode + '" type="checkbox" class="filled-in" /><span class="black-text">' + nameUser + '</span></label></li>';
+                                          document.getElementById('usersGroup').insertAdjacentHTML('afterbegin', codeEvent);
+                                        });
+                                      }
+                                    });
+                                  });
+                                });
+                              });
+                              //all other users
+                              nopartTab2.style.display = "initial";
+                              listUsers.addEventListener('click', e => {
+                                document.getElementById("users").innerHTML = "";
+                                var query = firebase.database().ref("NameUsers").orderByChild('info/name');
+                                query.once("value").then(function (snapshot) {
                                   snapshot.forEach(function (childSnapshot) {
                                     var userCode = childSnapshot.key;
                                     var ref = firebase.database().ref('Events/' + group + "/" + event1 + "/Members");
-                                    ref.once("value")
-                                      .then(function (snapshot) {
-                                        var hasParticipant = snapshot.hasChild(userCode);
-                                        if (!hasParticipant) { //display user only if isn't a participant of the event
+                                    ref.once("value").then(function (snapshot) {
+                                      var hasParticipant = snapshot.hasChild(userCode);
+                                      var ref = firebase.database().ref('Groups/' + group + "/Members");
+                                      ref.once("value").then(function (snapshot) {
+                                        var isMember = snapshot.hasChild(userCode);
+                                        if (!hasParticipant && !isMember) { //display user only if isn't a participant of the event and isn't a member of the current group
                                           var ref = firebase.database().ref('NameUsers/' + userCode);
                                           ref.once('value').then(function (snapshot) {
                                             var nameUser = snapshot.child("info/name").val();
@@ -193,8 +221,10 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
                                           });
                                         }
                                       });
+                                    });
                                   });
                                 });
+                              });
                               //modify button 2
                               btnMod2.style.display = "initial";
                               btnMod2.addEventListener('click', e => {
@@ -217,44 +247,8 @@ firebase.auth().onAuthStateChanged(firebaseUser => {
   }
 });
 
-//i use an async function to wait for the elimination of the participation of each user
-/*async function deleteEvent(cost) {
-  //delete the participation from each player that joined the event
-  console.log('Events/' + group + "/" + event1 + "/Members");
-  var query = firebase.database().ref('Events/' + group + "/" + event1 + "/Members").orderByKey();
-  await query.once("value")
-    .then(function (snapshot) {
-      snapshot.forEach(function (childSnapshot) {
-        var key = childSnapshot.key;
-        console.log("elimino da utente:" + key);
-        var refU = firebase.database().ref('NameUsers/' + key + "/EventsJoined/" + group + "/" + event1);
-        refU.remove(); //remove event joined by the user
-        outgoHistoryRemove(key); //remove outgo report because money given back
-        //give back money to participant
-        //server side function
-        var balanceChange = firebase.app().functions('europe-west1').httpsCallable('balanceChange');
-        balanceChange({ amount: cost, userSel: key }).then(function (result) {
-        }).catch(function (error) {
-        });
-
-      });
-    });
-  var refG = firebase.database().ref('Groups/' + group + "/Events/" + event1);
-  refG.remove();
-  refE = firebase.database().ref('Events/' + group + "/" + event1);
-  refE.remove()
-    .then(function () {
-      alert("Rimosso con successo l'evento: " + event1)
-      window.location.reload();
-    })
-    .catch(function (error) {
-      alert("Rimozione dell' evento non riuscita: " + error.message)
-    });
-}*/
-
 //eliminate and refund deselected participants
 function updateParticipants(cost) {
-  var balanceChange = firebase.app().functions('europe-west1').httpsCallable('balanceChange');
   var updateParticipantsI = firebase.app().functions('europe-west1').httpsCallable('updateParticipantsI');
   var query = firebase.database().ref('Events/' + group + "/" + event1 + "/Members").orderByKey();
   query.once("value").then(function (snapshot) {
@@ -263,23 +257,22 @@ function updateParticipants(cost) {
       if (document.getElementById(userCode)) {
         var namecheck = document.getElementById(userCode).checked; //true if checked
         if (!namecheck) { //select only the unchecked members
-          console.log("passo1  " + userCode);
+          console.log("passo1 update  " + userCode);
           //server side function
           //remove user from event
           updateParticipantsI({ amount: cost, group: group, event1: event1, userSel: userCode });
         }
       }
     });
-    alert("Partecipanti rimossi!")
+    alert("Partecipanti rimossi!");
     return "complete promise";
   }).then(function (message) {
     console.log(message);
-    setTimeout(function(){ window.location.reload(); }, 3500);   
+    setTimeout(function () { window.location.reload(); }, 3000);
   });
 }
 
 function addParticipants(cost) {
-  var balanceChange = firebase.app().functions('europe-west1').httpsCallable('balanceChange');
   var addParticipantsI = firebase.app().functions('europe-west1').httpsCallable('addParticipantsI');
   var query = firebase.database().ref("NameUsers").orderByKey();
   query.once("value").then(function (snapshot) {
@@ -287,19 +280,22 @@ function addParticipants(cost) {
       var userCode = childSnapshot.key;
       if (document.getElementById(userCode)) {
         var namecheck = document.getElementById(userCode).checked; //true if checked
-        if (namecheck) { //select only the checked users
-          //server side function
-          console.log("passo1  " + userCode);
-          //add user to the event
-          addParticipantsI({ amount: cost,group: group, event1: event1, userSel: userCode });
-        }
+        var query = firebase.database().ref('Events/' + group + "/" + event1 + "/Members").orderByKey();
+        query.once("value").then(function (snapshot) {
+          var hasParticipant = snapshot.hasChild(userCode);
+          if (namecheck && !hasParticipant) { //select only the checked users that aren't partecipating in the event
+            //server side function
+            console.log("passo1 add  " + userCode);
+            //add user to the event
+            addParticipantsI({ amount: cost, group: group, event1: event1, userSel: userCode });
+          }
+        });
       }
     });
-    alert("Partecipanti aggiunti!")
-    setTimeout(3000);
-    return "complete promise"
+    alert("Partecipanti aggiunti!");
+    return "complete promise";
   }).then(function (message) {
     console.log(message);
-    setTimeout(function(){ window.location.reload(); }, 3500);
+    setTimeout(function () { window.location.reload(); }, 3000);
   });
 }

@@ -5,7 +5,6 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-//2 FUNZIONI UNA PER CAMBIARE IL PROPRIO BILANCIO E UNA PERCHé L' ADMIN POSSA CAMBIARE QUELLO DEGLI UTENTI (una 3° per calcolare la modifica del contributo da parte dell'admin)
 //user function
 exports.manageCost = functions.region('europe-west1').https.onCall((data, context) => {
   const group = data.group;

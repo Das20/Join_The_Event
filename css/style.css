@@ -67,6 +67,10 @@ html,
   display:none;
 }
 
+.border{
+  margin: 10px;
+}
+
 /* == Responsive Web Design (mobile first) ===== */
 /* MOBILE */
 

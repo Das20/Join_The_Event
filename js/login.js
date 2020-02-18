@@ -33,12 +33,6 @@ btnSignUp.addEventListener('click', e => {
   promise.catch(e => alert(e.message));
 });
 
-/*logout
-btnLogout.addEventListener('click', e => {
-    firebase.auth().signOut();
-    window.location.href = "index.html";
-    });
-*/
 //login with google
 btnGoogle.addEventListener('click', e => {
 
@@ -67,19 +61,15 @@ btnGoogle.addEventListener('click', e => {
 firebase.auth().onAuthStateChanged(firebaseUser => {
   if (firebaseUser) {
     startUser();
-
   } else {
     console.log('not logged in');
-
   }
 });
 
 async function startUser() {
-        //server function
-        var initUserData = firebase.app().functions('europe-west1').httpsCallable('initUserData');
-        await initUserData({email : firebase.auth().currentUser.email}).then(function (result) {
-        }).catch(function (error) {
-        });
-        window.location.href = "nextpage.html";
+  //server function
+  var initUserData = firebase.app().functions('europe-west1').httpsCallable('initUserData');
+  await initUserData({ email: firebase.auth().currentUser.email });
+  window.location.href = "nextpage.html";
 }
 
